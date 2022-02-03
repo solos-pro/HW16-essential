@@ -128,5 +128,30 @@ def users():
             res.append(u.to_dict())
         return json.dumps(res), 200, CONTENT_TYPE
 
+
+@app.route("/user/<int:uid>", methods=['GET', 'POST', 'DELETE', 'PUT'])
+def user(uid):
+    if request.method == "GET":
+        return json.dumps(User.query.get(uid).to_dict()), 200, CONTENT_TYPE
+    elif request.method == "DELETE":
+        del_user = User.query.get(uid)
+        db.session.delete(del_user)
+        db.session.commit()
+        return "", 204
+    elif request.method == "POST":
+        user_data = json.loads(request.data)
+        u = User.query.get(uid)
+        u.first_name = user_data['first_name']
+        u.last_name = user_data['last_name']
+        u.age = user_data['age']
+        u.email = user_data['email']
+        u.role = user_data['role']
+        u.phone = user_data['phone']
+        db.session.add(u)
+        db.session.commit()
+        return "", 204
+
+
 if __name__ == '__main__':
     app.run(debug=True)
+
