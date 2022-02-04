@@ -1,10 +1,9 @@
 from flask import Flask, render_template, request
 from flask_sqlalchemy import SQLAlchemy
 import raw_data
-import random
 import json
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='templates')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -149,7 +148,13 @@ def user(uid):
         u.phone = user_data['phone']
         db.session.add(u)
         db.session.commit()
-        return "", 204
+        return render_template("test.html")
+
+
+@app.route("/test")
+def test():
+    return "test.html"
+    # return render_template("test.html")
 
 
 if __name__ == '__main__':
