@@ -138,30 +138,32 @@ def user(uid):
         db.session.commit()
         return "", 204
     elif request.method == "POST":
-        user_data = json.loads(request.data)
         u = User.query.get(uid)
-        u.first_name = user_data['first_name']
-        u.last_name = user_data['last_name']
-        u.age = user_data['age']
-        u.email = user_data['email']
-        u.role = user_data['role']
-        u.phone = user_data['phone']
+        # user_data = json.loads(request.form)
+        u.first_name = request.form.get('first_name')
+        u.last_name = request.form.get('last_name')
+        u.age = request.form.get('age')
+        u.email = request.form.get('email')
+        u.role = request.form.get('role')
+        u.phone = request.form.get('phone')
         db.session.add(u)
         db.session.commit()
+
+        rows = [[x.id, x.first_name, x.last_name,
+                 x.age, x.email, x.role, x.phone] for x in do_request()]
+        mytable.add_rows(rows)
+        print(mytable)
         return "", 204
 
-#
-# @app.route("/testtt", methods=['GET', 'POST'])
-# def testtt():
-#     if request.method == "GET":
-#         res = []
-#         for u in User.query.all():
-#             res.append(u.to_dict())
-#         return render_template("test.html")
+
+@app.route("/test_test", methods=['GET', 'POST'])
+def testtt():
+    if request.method == "GET":
+        return render_template("test.html")
 
 
 def do_request():
-    result = db.session.query(User).all()
+    result = db.session.query(User).limit(5).all()
     return result
 
 
