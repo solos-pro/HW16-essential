@@ -2,6 +2,8 @@ from flask import Flask, render_template, request
 from flask_sqlalchemy import SQLAlchemy
 import raw_data
 import json
+import prettytable
+
 
 app = Flask(__name__, template_folder='templates')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
@@ -42,7 +44,6 @@ class Offer(db.Model):
     order_id = db.Column(db.Integer, db.ForeignKey('order.id'))
     executor_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
-
     def to_dict(self):
         return {
             "id": self.id,
@@ -63,7 +64,6 @@ class Order(db.Model):
     price = db.Column(db.Integer)
     customer_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     executor_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-
 
     def to_dict(self):
         return {
@@ -148,14 +148,36 @@ def user(uid):
         u.phone = user_data['phone']
         db.session.add(u)
         db.session.commit()
-        return render_template("test.html")
+        return "", 204
+
+#
+# @app.route("/testtt", methods=['GET', 'POST'])
+# def testtt():
+#     if request.method == "GET":
+#         res = []
+#         for u in User.query.all():
+#             res.append(u.to_dict())
+#         return render_template("test.html")
 
 
-@app.route("/test")
-def test():
-    return "test.html"
-    # return render_template("test.html")
+def do_request():
+    result = db.session.query(User).all()
+    return result
 
+
+mytable = prettytable.PrettyTable()
+mytable.field_names = [
+    'id', 'first_name', 'last_name',
+    'age', 'email', 'role', 'phone']
+
+rows = [[x.id, x.first_name, x.last_name,
+         x.age, x.email, x.role, x.phone] for x in do_request()]
+mytable.add_rows(rows)
+mytable.max_width = 25
+
+
+# print('Запрос возвращает следующие записи:')
+# print(mytable)
 
 if __name__ == '__main__':
     app.run(debug=True)
