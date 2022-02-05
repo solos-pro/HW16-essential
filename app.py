@@ -119,7 +119,7 @@ for data_offer in raw_data.offers:
     db.session.commit()
 
 
-@app.route("/users", methods=['GET', 'POST'])
+@app.route("/users", methods=['GET', ])
 def users():
     if request.method == "GET":
         res = []
@@ -128,7 +128,7 @@ def users():
         return json.dumps(res), 200, CONTENT_TYPE
 
 
-@app.route("/user/<int:uid>", methods=['GET', 'POST', 'DELETE', 'PUT'])
+@app.route("/users/<int:uid>", methods=['GET', 'POST', 'DELETE', 'PUT'])
 def user(uid):
     if request.method == "GET":
         return json.dumps(User.query.get(uid).to_dict()), 200, CONTENT_TYPE
@@ -137,7 +137,7 @@ def user(uid):
         db.session.delete(del_user)
         db.session.commit()
         return "", 204
-    elif request.method == "POST":
+    elif request.method == "PUT":   # updating
         u = User.query.get(uid)
         # user_data = json.loads(request.form)
         u.first_name = request.form.get('first_name')
@@ -148,7 +148,16 @@ def user(uid):
         u.phone = request.form.get('phone')
         db.session.add(u)
         db.session.commit()
-
+        return "", 204
+    elif request.method == "POST":  # adding
+        u = User(first_name=request.form.get('first_name'),
+                 last_name=request.form.get('last_name'),
+                 age=request.form.get('age'),
+                 email=request.form.get('email'),
+                 role=request.form.get('role'),
+                 phone=request.form.get('phone'))
+        db.session.add(u)
+        db.session.commit()
         rows = [[x.id, x.first_name, x.last_name,
                  x.age, x.email, x.role, x.phone] for x in do_request()]
         mytable.add_rows(rows)
