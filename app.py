@@ -119,6 +119,10 @@ for data_offer in raw_data.offers:
 
 @app.route("/users", methods=['GET', 'POST'])
 def users():
+    """
+    GET-method.     The function returns a json of all of the users.
+    POST-method.    result of an adding operation you will see on a terminal in pretty-table (several rows at the end).
+    """
     if request.method == "GET":
         res = []
         for u in User.query.all():
@@ -144,7 +148,13 @@ def users():
 
 
 @app.route("/users/<int:uid>", methods=['GET', 'DELETE', 'PUT'])
+
 def user(uid):
+    '''
+    GET-method.     The function returns a json one of the users.
+    DELETE-method.  The function deleting a user.
+    PUT-method.     result of an updating operation you will see on a terminal in pretty-table of the first 5 rows.
+    '''
     if request.method == "GET":
         return json.dumps(User.query.get(uid).to_dict()), 200, CONTENT_TYPE
     elif request.method == "DELETE":
@@ -176,6 +186,10 @@ def user(uid):
 
 @app.route("/orders", methods=['GET', 'POST'])
 def orders():
+    """
+    GET-method.     The function returns a json of all of the users.
+    POST-method.    result of an adding operation you will see on a terminal in pretty-table (several rows at the end).
+    """
     if request.method == "GET":
         res = []
         for o in Order.query.all():
@@ -207,6 +221,11 @@ def orders():
 
 @app.route("/orders/<int:uid>", methods=['GET', 'DELETE', 'PUT'])
 def order(uid):
+    '''
+    GET-method.     The function returns a json one of the orders.
+    DELETE-method.  The function deleting an order.
+    PUT-method.     result of an updating operation you will see on a terminal in pretty-table of the first 5 rows.
+    '''
     if request.method == "GET":
         return json.dumps(User.query.get(uid).to_dict()), 200, CONTENT_TYPE
     elif request.method == "DELETE":
@@ -239,8 +258,60 @@ def order(uid):
         return "", 204
 
 
+@app.route("/offers", methods=['GET', 'POST'])
+def offers():
+    """
+    GET-method.     The function returns a json of all of the offers.
+    POST-method.    The function returns a json of all of the offers.
+    """
+    if request.method == "GET":
+        res = []
+        for o in Offer.query.all():
+            res.append(o.to_dict())
+        return json.dumps(res), 200, CONTENT_TYPE
+    elif request.method == "POST":  # adding
+        o = Offer(order_id=request.form.get('order_id'),
+                  executor_id=request.form.get('executor_id')
+                  )
+        db.session.add(o)
+        db.session.commit()
+
+        res = []
+        for o in Offer.query.all():
+            res.append(o.to_dict())
+        return json.dumps(res), 200, CONTENT_TYPE
+
+
+@app.route("/offers/<int:uid>", methods=['GET', 'DELETE', 'PUT'])
+def offer(uid):
+    """
+    GET-method.     The function which returns a json one of the offers.
+    DELETE-method.  The function deleting an offer.
+    PUT-method.     The function returns a json of all of the offers.
+    """
+    if request.method == "GET":
+        return json.dumps(Offer.query.get(uid).to_dict()), 200, CONTENT_TYPE
+    elif request.method == "DELETE":
+        del_offer = Offer.query.get(uid)
+        db.session.delete(del_offer)
+        db.session.commit()
+        return "", 204
+    elif request.method == "PUT":  # updating
+        o = Offer.query.get(uid)
+        o.order_id = request.form.get('order_id')
+        o.executor_id = request.form.get('executor_id')
+        db.session.add(o)
+        db.session.commit()
+
+        res = []
+        for o in Offer.query.all():
+            res.append(o.to_dict())
+        return json.dumps(res), 200, CONTENT_TYPE
+
+
 @app.route("/test_test", methods=['GET', 'POST'])
 def test():
+    """ Instead of Postman function for sending POST request to localhost//users/2"""
     if request.method == "GET":
         return render_template("test.html")
 
@@ -248,6 +319,7 @@ def test():
 def do_request_user_add():
     result = db.session.query(User).limit(5).offset(28).all()
     return result
+
 
 def do_request_order_add():
     result = db.session.query(Order).limit(5).offset(47).all()
@@ -258,12 +330,11 @@ def do_request_user_update():
     result = db.session.query(User).limit(5).all()
     return result
 
+
 def do_request_order_update():
     result = db.session.query(Order).limit(5).all()
     return result
 
-# print('Запрос возвращает следующие записи:')
-# print(mytable)
 
 if __name__ == '__main__':
     app.run(debug=True)
